@@ -3,7 +3,11 @@
   (:gen-class))
 
 (declare successful-move prompt-move game-over query-rows)
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+
+(defn tri*
+ "Generates lazy seq of trianglur numbers"
+ ([] (tri* 0 1))
+ ([sum n]
+  (let [new-sum (+ sum n)]
+   (cons new-sum (lazy-seq (tri* new-sum (inc n)))))))
+
