@@ -11,3 +11,4 @@
   (let [new-sum (+ sum n)]
    (cons new-sum (lazy-seq (tri* new-sum (inc n)))))))
 
+(def tri (tri*))
