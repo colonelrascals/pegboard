@@ -43,9 +43,25 @@
           board
           [[pos destination] [destination pos]])
   board))
-  
-  
-  
+
+(connect {} 15 1 2 4)
+
+(defn connect-right
+ [board max-pos pos]
+ (let [neighbor (inc pos)
+       destination (inc neighbor)]
+      (if-not (or (trianglar? neighbor) (trianglar? pos))
+       (connect board max-pos pos neighbor destination)
+       board)))
+
+(defn connect-down-right
+ [board max-pos pos])
+
+(defn connect-down-left
+ [board max-pos pos])
+
+(defn connect-left
+ [board max-pos pos])  
 
 (defn -main
   [& args]
