@@ -70,7 +70,26 @@
  
 
 (defn connect-left
- [board max-pos pos])  
+ [board max-pos pos]
+ (println "Not sure I'll need this"))
+
+(defn add-position
+ "pegs position and performs connection"
+ [board max-pos pos]
+ (let [pegged-board (assoc-in board [pos :pegged] true)]
+  (reduce (fn [new-board connection-creation-fn]
+           (connection-creation-fn new-board max-pos pos))
+          pegged-board
+          [connect-right connect-down-left connect-down-right])))
+   
+(defn new-board
+ "Lets create a new board"
+ [rows]
+ (let [initial-board {:rows rows}
+       max-pos (row-tri rows)]
+      (reduce (fn [board pos] (add-pos board max-pos pos))
+       initial-board
+       (range (inc max-pos)))))
 
 (defn -main
   [& args]
