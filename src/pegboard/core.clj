@@ -91,6 +91,22 @@
        initial-board
        (range (inc max-pos)))))
 
+(defn pegged?
+ "This is the greatest function I have ever defined"
+ [board pos]
+ (get-in board [pos :pegged]))
+
+(defn remove-peg
+ [board pos]
+ (assoc-in board [pos :pegged] false))
+
+(defn place-peg
+ [board pos]
+ (assoc-in board [pos :pegged] true))
+
+(defn move-peg
+ [board p1 p2]
+ (place-peg (remove-peg p1) p2))
 (defn -main
   [& args]
   (println "Get ready to play peg thing!"))
