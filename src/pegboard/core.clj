@@ -107,6 +107,30 @@
 (defn move-peg
  [board p1 p2]
  (place-peg (remove-peg p1) p2))
+
+(defn valid-moves
+ "Return map of valid moves. Key is destination value is jumped pos"
+ [board pos]
+ (int {}
+  (filter (fn [[destination jumped]]
+           (and (not (pegged? board destination))
+            (pegged? board jumped)))
+          (get-in board [pos :connections]))))
+
+(defn make-move 
+ [board p1 p2]
+ (if-let [jumped (valid-move? board p1 p2)]
+  (move-peg (remove-peg board jumped) p1 p2)))
+
+(defn can-move?
+ [board]
+ (some (comp not-empty (partial valid-moves board))
+  (map first (filter #(get (second %) :pegged) board))))
+
+(def board-start 97)
+(def board-end 123)
+(def letters (map (comp str str) (range board-start board-end)))  
+(def pos-chars 3)
 (defn -main
   [& args]
   (println "Get ready to play peg thing!"))
