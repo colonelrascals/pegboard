@@ -131,6 +131,35 @@
 (def board-end 123)
 (def letters (map (comp str str) (range board-start board-end)))  
 (def pos-chars 3)
+
+(defn render-pos
+ [board pos]
+ (str (nth letters (dec pos))
+  (if (get-in board [pos :pegged])
+   (colorize "O" :blue)
+   (colorize "-" :red))))
+
+(defn row-positions
+ [row-num]
+ (range (inc (or (row-tri (dec row-num)) 0))
+        (inc (row-tri row-num))))
+
+(defn row-padding
+ [row-num rows]
+ (let [pad-length (/ (* (- rows row-num) pos-chars) 2)]
+  (apply str (take pad-length (repeat " ")))))
+
+(defn render-row
+ [board row-num]
+ (str (row-padding row-nnum (:rows board))
+  (clojure.string/join " " (map (partial render-pos board)
+                                (row-positions row-num)))))
+
+(defn print-board
+ [board]
+ (doseq [row-num (range 1 (inc (:rows board)))]
+  (println (render-row board row-num))))
+
 (defn -main
   [& args]
   (println "Get ready to play peg thing!"))
