@@ -17,10 +17,6 @@
  [n]
  (= n (last (take-while #(>= n %) tri))))
 
-(trianglur? 5)
-
-(trianglar? 6)
-
 (defn row-tri 
  [n]
  (last (take n tri)))
@@ -50,7 +46,7 @@
  [board max-pos pos]
  (let [neighbor (inc pos)
        destination (inc neighbor)]
-      (if-not (or (trianglar? neighbor) (trianglar? pos))
+      (if-not (or (trianglur? neighbor) (trianglur? pos))
        (connect board max-pos pos neighbor destination)
        board)))
 
@@ -62,10 +58,10 @@
       (connect board max-pos pos neighbor destination)))
 
 (defn connect-down-left
- [board max-pos pos]
- (let [row (row-num pos)]
-      neighbor (+ 1 row pos)
-      destination (+ 2 row neighbor)
+  [board max-pos pos]
+  (let [row (row-num pos)
+        neighbor (+ row pos)
+        destination (+ 1 row neighbor)]
     (connect board max-pos pos neighbor destination)))
  
 
@@ -73,14 +69,13 @@
  [board max-pos pos]
  (println "Not sure I'll need this"))
 
-(defn add-position
- "pegs position and performs connection"
- [board max-pos pos]
- (let [pegged-board (assoc-in board [pos :pegged] true)]
-  (reduce (fn [new-board connection-creation-fn]
-           (connection-creation-fn new-board max-pos pos))
-          pegged-board
-          [connect-right connect-down-left connect-down-right])))
+ (defn add-pos
+  "Pegs the position and performs connections"
+  [board max-pos pos]
+  (let [pegged-board (assoc-in board [pos :pegged] true)]
+    (reduce (fn [new-board connector] (connector new-board max-pos pos))
+            pegged-board
+            [connect-right connect-down-left connect-down-right])))
    
 (defn new-board
  "Lets create a new board"
@@ -108,14 +103,22 @@
  [board p1 p2]
  (place-peg (remove-peg p1) p2))
 
-(defn valid-moves
- "Return map of valid moves. Key is destination value is jumped pos"
- [board pos]
- (int {}
-  (filter (fn [[destination jumped]]
-           (and (not (pegged? board destination))
-            (pegged? board jumped)))
-          (get-in board [pos :connections]))))
+ (defn valid-moves
+  "Return a map of all valid moves for pos, where the key is the
+  destination and the value is the jumped position"
+  [board pos]
+  (into {}
+        (filter (fn [[destination jumped]]
+                  (and (not (pegged? board destination))
+                       (pegged? board jumped)))
+                (get-in board [pos :connections]))))
+
+(defn valid-move?
+  "Return jumped position if the move from p1 to p2 is valid, nil
+  otherwise"
+  [board p1 p2]
+  (get (valid-moves board p1) p2))
+                
 
 (defn make-move 
  [board p1 p2]
@@ -127,17 +130,33 @@
  (some (comp not-empty (partial valid-moves board))
   (map first (filter #(get (second %) :pegged) board))))
 
-(def board-start 97)
-(def board-end 123)
-(def letters (map (comp str str) (range board-start board-end)))  
+(def alpha-start 97)
+(def alpha-end 123)
+(def letters (map (comp str char) (range alpha-start alpha-end)))
 (def pos-chars 3)
 
+(def ansi-styles
+  {:red   "[31m"
+    :green "[32m"
+    :blue  "[34m"
+    :reset "[0m"})
+
+(defn ansi
+  "Produce a string which will apply an ansi style"
+  [style]
+  (str \u001b (style ansi-styles)))
+
+(defn colorize
+  "Apply ansi color to text"
+  [text color]
+  (str (ansi color) text (ansi :reset)))
+
 (defn render-pos
- [board pos]
- (str (nth letters (dec pos))
-  (if (get-in board [pos :pegged])
-   (colorize "O" :blue)
-   (colorize "-" :red))))
+  [board pos]
+  (str (nth letters (dec pos))
+        (if (get-in board [pos :pegged])
+          (colorize "0" :blue)
+          (colorize "-" :red))))
 
 (defn row-positions
  [row-num]
