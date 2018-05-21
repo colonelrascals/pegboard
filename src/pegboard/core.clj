@@ -160,6 +160,60 @@
  (doseq [row-num (range 1 (inc (:rows board)))]
   (println (render-row board row-num))))
 
+(defn letter->pos
+  [letter]
+  (inc (- (int (first letter)) alpha-start)))
+
+(defn get-input
+  ([] (get-input nil))
+  ([default]
+    (let [input (clojure.string/trim (read-line))]
+      (if (empty? input)
+        default
+        (clojure.string/lower-case input)))))
+  
+  
+(defn characters-as-strings [string] (re-seq #"[a-zA-Z]" string))
+
+(defn user-entered-invald-move 
+  [board]
+  (println "\n!!! That was an invalid move :(\n")
+  (prompt-move board))
+
+(defn user-entered-valid-move
+  [board]
+  (if (can-move? board)
+    (prompt-move board)
+    (game-over board)))
+
+(defn game-over
+  [board]
+  (let [remaining-pegs (count (filter :pegged (vals board)))]
+    (println "Game over! You had" remaining-pegs "pegs left:")
+    (print-board board)
+    (println "Play again? y/n [y]")
+    (let [input (get-input "y")]
+      (if (= "y" input)
+        (prompt-rows)
+        (do
+          (println "Bye!")
+          (System/exit 0))))))
+
+(defn prompt-empty-peg
+  [board]
+  (println "Here's your board:")
+  (print-board board)
+  (println "Remove which peg? [e]")
+  (prompt-move (remove-peg board (letter->pos (get-input "e")))))
+
+(defn prompt-rows
+  []
+  (println "How many rows? [5]")
+  (let [rows (Integer. (get-input 5))
+        board (new-board rows)]
+    (prompt-empty-peg board)))
+
 (defn -main
   [& args]
-  (println "Get ready to play peg thing!"))
+  (println "Get ready to play peg thing!")
+  (prompt-rows))
