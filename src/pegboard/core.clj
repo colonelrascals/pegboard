@@ -2,7 +2,7 @@
   (require [clojure.set :as set])
   (:gen-class))
 
-(declare successful-move prompt-move game-over query-rows)
+(declare successful-move prompt-move game-over query-rows prompt-rows)
 
 (defn tri*
  "Generates lazy seq of trianglur numbers"
@@ -169,10 +169,9 @@
   (apply str (take pad-length (repeat " ")))))
 
 (defn render-row
- [board row-num]
- (str (row-padding row-nnum (:rows board))
-  (clojure.string/join " " (map (partial render-pos board)
-                                (row-positions row-num)))))
+  [board row-num]
+  (str (row-padding row-num (:rows board))
+        (clojure.string/join " " (map (partial render-pos board) (row-positions row-num)))))
 
 (defn print-board
  [board]
@@ -200,6 +199,24 @@
   (prompt-move board))
 
 (defn user-entered-valid-move
+  [board]
+  (if (can-move? board)
+    (prompt-move board)
+    (game-over board)))
+
+(defn prompt-move
+  [board]
+  (println "\nHere's your board:")
+  (print-board board)
+  (println "Move from where to where? Enter two letters:")
+  (let [input (map letter->pos (characters-as-strings (get-input)))]
+    (if-let [new-board (make-move board (first input) (second input))]
+      (successful-move new-board)
+      (do
+        (println "\n!!! That was an invalid move :(\n")
+        (prompt-move board)))))
+
+(defn successful-move
   [board]
   (if (can-move? board)
     (prompt-move board)
